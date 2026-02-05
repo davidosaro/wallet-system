@@ -1,9 +1,13 @@
-export enum TransactionType {
-  TRANSFER = 'TRANSFER',
-  FUNDING = 'FUNDING',
-  INTEREST = 'INTEREST',
-  DISBURSEMENT = 'DISBURSEMENT',
-}
+// Transaction type string literals
+export type TransactionType = 'TRANSFER' | 'FUNDING' | 'INTEREST' | 'DISBURSEMENT';
+
+// Transaction type constants for convenience
+export const TransactionType = {
+  TRANSFER: 'TRANSFER' as TransactionType,
+  FUNDING: 'FUNDING' as TransactionType,
+  INTEREST: 'INTEREST' as TransactionType,
+  DISBURSEMENT: 'DISBURSEMENT' as TransactionType,
+};
 
 export enum TransactionStatus {
   PENDING = 'PENDING',

@@ -29,11 +29,11 @@ const options: swaggerJsdoc.Options = {
           type: 'object',
           required: ['name', 'email'],
           properties: {
-            name: { type: 'string', example: 'John Doe' },
+            name: { type: 'string', example: 'David Osaro' },
             email: {
               type: 'string',
               format: 'email',
-              example: 'john@example.com',
+              example: 'osarodavid588@gmail.com',
             },
           },
         },
@@ -203,7 +203,10 @@ const options: swaggerJsdoc.Options = {
               description: 'Source account (typically a pool account)',
             },
             amount: { type: 'number', example: 100.0 },
-            reference: { type: 'string', example: 'Deposit from bank transfer' },
+            reference: {
+              type: 'string',
+              example: 'Deposit from bank transfer',
+            },
             metadata: { type: 'object', example: { bankRef: 'BNK123' } },
           },
         },
@@ -217,7 +220,10 @@ const options: swaggerJsdoc.Options = {
               description: 'Source account (typically a pool account)',
             },
             amount: { type: 'number', example: 100.0 },
-            reference: { type: 'string', example: 'Deposit from bank transfer' },
+            reference: {
+              type: 'string',
+              example: 'Deposit from bank transfer',
+            },
             metadata: { type: 'object', example: { bankRef: 'BNK123' } },
           },
         },

@@ -6,7 +6,11 @@ import { accountRepository } from '../repositories/accountRepository';
 import { walletRepository } from '../repositories/walletRepository';
 import { TransactionType, TransactionStatus } from '../types/transaction';
 import { EntryType } from '../types/ledgerEntry';
-import { FundAccountDto, FundWalletDto, FundingResponse } from '../types/funding';
+import {
+  FundAccountDto,
+  FundWalletDto,
+  FundingResponse,
+} from '../types/funding';
 
 export class FundingError extends Error {
   constructor(
@@ -38,16 +42,23 @@ export const fundingService = {
     const { accountNo, amount, sourceAccountNo, reference, metadata } = request;
 
     if (amount <= 0) {
-      throw new FundingError('Amount must be greater than zero', 'INVALID_AMOUNT');
+      throw new FundingError(
+        'Amount must be greater than zero',
+        'INVALID_AMOUNT'
+      );
     }
 
     if (accountNo === sourceAccountNo) {
-      throw new FundingError('Source and destination cannot be the same', 'SAME_ACCOUNT');
+      throw new FundingError(
+        'Source and destination cannot be the same',
+        'SAME_ACCOUNT'
+      );
     }
 
     // Check idempotency
     if (idempotencyKey) {
-      const existingTx = await transactionRepository.findByIdempotencyKey(idempotencyKey);
+      const existingTx =
+        await transactionRepository.findByIdempotencyKey(idempotencyKey);
       if (existingTx) {
         const status = existingTx.get('status') as TransactionStatus;
         if (status === TransactionStatus.COMPLETED) {
@@ -70,33 +81,53 @@ export const fundingService = {
           ? [sourceAccountNo, accountNo]
           : [accountNo, sourceAccountNo];
 
-      const firstAccount = await accountRepository.findByAccountNoWithLock(firstNo, t);
-      const secondAccount = await accountRepository.findByAccountNoWithLock(secondNo, t);
+      const firstAccount = await accountRepository.findByAccountNoWithLock(
+        firstNo,
+        t
+      );
+      const secondAccount = await accountRepository.findByAccountNoWithLock(
+        secondNo,
+        t
+      );
 
-      const sourceAccount = sourceAccountNo === firstNo ? firstAccount : secondAccount;
+      const sourceAccount =
+        sourceAccountNo === firstNo ? firstAccount : secondAccount;
       const destAccount = accountNo === firstNo ? firstAccount : secondAccount;
 
       if (!sourceAccount) {
-        throw new FundingError('Source account not found', 'SOURCE_ACCOUNT_NOT_FOUND');
+        throw new FundingError(
+          'Source account not found',
+          'SOURCE_ACCOUNT_NOT_FOUND'
+        );
       }
       if (!destAccount) {
-        throw new FundingError('Destination account not found', 'DESTINATION_ACCOUNT_NOT_FOUND');
+        throw new FundingError(
+          'Destination account not found',
+          'DESTINATION_ACCOUNT_NOT_FOUND'
+        );
       }
 
       // Check currencies match
       const sourceCurrency = sourceAccount.get('currency') as string;
       const destCurrency = destAccount.get('currency') as string;
       if (sourceCurrency !== destCurrency) {
-        throw new FundingError('Currency mismatch between accounts', 'CURRENCY_MISMATCH');
+        throw new FundingError(
+          'Currency mismatch between accounts',
+          'CURRENCY_MISMATCH'
+        );
       }
 
       // For pool accounts funding user wallets, we allow negative balance on pool
       // (represents money that has been disbursed)
       // For other cases, check sufficient balance
-      const sourceBalance = parseFloat(sourceAccount.get('clearedBalance') as string);
+      const sourceBalance = parseFloat(
+        sourceAccount.get('clearedBalance') as string
+      );
 
       // Calculate new balances
-      const destBalance = parseFloat(destAccount.get('clearedBalance') as string);
+      const destBalance = parseFloat(
+        destAccount.get('clearedBalance') as string
+      );
       const sourceBalanceAfter = sourceBalance - amount;
       const destBalanceAfter = destBalance + amount;
 
@@ -257,12 +288,20 @@ export const fundingService = {
     }
 
     // Fallback to ledger entries for older transactions
-    const entries = await ledgerEntryRepository.findByTransactionId(transactionId);
-    const debitEntry = entries.find((e) => e.get('entryType') === EntryType.DEBIT);
-    const creditEntry = entries.find((e) => e.get('entryType') === EntryType.CREDIT);
+    const entries =
+      await ledgerEntryRepository.findByTransactionId(transactionId);
+    const debitEntry = entries.find(
+      (e) => e.get('entryType') === EntryType.DEBIT
+    );
+    const creditEntry = entries.find(
+      (e) => e.get('entryType') === EntryType.CREDIT
+    );
 
     if (!debitEntry || !creditEntry) {
-      throw new FundingError('Invalid transaction state', 'INVALID_TRANSACTION');
+      throw new FundingError(
+        'Invalid transaction state',
+        'INVALID_TRANSACTION'
+      );
     }
 
     return {

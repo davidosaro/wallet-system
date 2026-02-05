@@ -10,7 +10,7 @@ export function startInterestAccrualJob() {
   // Schedule: Every day at midnight (00:00)
   // Cron format: second minute hour day month weekday
   // '0 0 * * *' = At 00:00 every day
-  const schedule = '* * * * *';
+  const schedule = '* * * * *'; //TODO: Change this to Midnight '0 0 * * *'
 
   cron.schedule(schedule, async () => {
     logger.info('Starting daily interest accrual job...');

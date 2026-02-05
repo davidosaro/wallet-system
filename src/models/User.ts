@@ -18,6 +18,14 @@ export const User = sequelize.define<Model<UserAttributes, CreateUserDto>>(
       type: DataTypes.STRING(),
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: {
+          msg: 'Must be a valid email address',
+        },
+        notEmpty: {
+          msg: 'Email cannot be empty',
+        },
+      },
     },
   },
   {

@@ -3,7 +3,6 @@ import { sequelize } from '../config/database';
 import {
   TransactionAttributes,
   CreateTransactionDto,
-  TransactionType,
   TransactionStatus,
 } from '../types/transaction';
 
@@ -24,7 +23,7 @@ export const Transaction = sequelize.define<
       field: 'idempotency_key',
     },
     transactionType: {
-      type: DataTypes.ENUM(...Object.values(TransactionType)),
+      type: DataTypes.STRING(50),
       allowNull: false,
       field: 'transaction_type',
     },
