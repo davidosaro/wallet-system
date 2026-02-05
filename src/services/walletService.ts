@@ -3,6 +3,16 @@ import { accountRepository } from '../repositories/accountRepository';
 import { accountService } from './accountService';
 import { CreateWalletDto } from '../types/wallet';
 
+export class WalletError extends Error {
+  constructor(
+    message: string,
+    public code: string
+  ) {
+    super(message);
+    this.name = 'WalletError';
+  }
+}
+
 export interface WalletWithAccountBalance {
   id: string;
   userId: string;
@@ -85,13 +95,28 @@ export const walletService = {
   },
 
   async create(data: CreateWalletDto) {
+    const { userId, currency = 'NGN' } = data;
+
+    // Check if user already has a wallet in this currency
+    const existingWallet = await walletRepository.findByUserIdAndCurrency(
+      userId,
+      currency
+    );
+
+    if (existingWallet) {
+      throw new WalletError(
+        `User already has a wallet in ${currency}`,
+        'WALLET_ALREADY_EXISTS'
+      );
+    }
+
     const wallet = await walletRepository.create(data);
     const walletId = wallet.get('id') as string;
-    const currency = wallet.get('currency') as string;
+    const walletCurrency = wallet.get('currency') as string;
 
     const account = await accountService.createWalletAccount(
       walletId,
-      currency,
+      walletCurrency,
       `Wallet Account - ${walletId.slice(0, 8)}`
     );
 
@@ -99,74 +124,6 @@ export const walletService = {
     await walletRepository.updateAccountNo(walletId, accountNo);
 
     return walletRepository.findById(walletId);
-  },
-
-  /**
-   * @deprecated Use fundingService.fundWallet() instead for proper accounting
-   * This method only updates the wallet table and does NOT create ledger entries
-   */
-  async deposit(id: string, amount: number) {
-    console.warn(
-      'DEPRECATED: walletService.deposit() does not create ledger entries. Use fundingService.fundWallet() instead.'
-    );
-    const wallet = await walletRepository.findById(id);
-    if (!wallet) return null;
-
-    const currentBalance = parseFloat(wallet.get('balance') as string);
-    const newBalance = currentBalance + amount;
-
-    return walletRepository.updateBalance(id, newBalance);
-  },
-
-  /**
-   * @deprecated Use transferService.transfer() instead for proper accounting
-   * This method only updates the wallet table and does NOT create ledger entries
-   */
-  async withdraw(id: string, amount: number) {
-    console.warn(
-      'DEPRECATED: walletService.withdraw() does not create ledger entries. Use transferService.transfer() instead.'
-    );
-    const wallet = await walletRepository.findById(id);
-    if (!wallet) return null;
-
-    const currentBalance = parseFloat(wallet.get('balance') as string);
-    if (currentBalance < amount) {
-      throw new Error('Insufficient balance');
-    }
-
-    const newBalance = currentBalance - amount;
-    return walletRepository.updateBalance(id, newBalance);
-  },
-
-  /**
-   * @deprecated Use transferService.transfer() instead for proper accounting
-   * This method only updates wallet tables and does NOT create ledger entries
-   */
-  async transfer(fromId: string, toId: string, amount: number) {
-    console.warn(
-      'DEPRECATED: walletService.transfer() does not create ledger entries. Use transferService.transfer() instead.'
-    );
-    const fromWallet = await walletRepository.findById(fromId);
-    const toWallet = await walletRepository.findById(toId);
-
-    if (!fromWallet || !toWallet) {
-      throw new Error('Wallet not found');
-    }
-
-    const fromBalance = parseFloat(fromWallet.get('balance') as string);
-    if (fromBalance < amount) {
-      throw new Error('Insufficient balance');
-    }
-
-    const toBalance = parseFloat(toWallet.get('balance') as string);
-
-    await walletRepository.updateBalance(fromId, fromBalance - amount);
-    await walletRepository.updateBalance(toId, toBalance + amount);
-
-    return {
-      fromWallet: await walletRepository.findById(fromId),
-      toWallet: await walletRepository.findById(toId),
-    };
   },
 
   delete(id: string) {

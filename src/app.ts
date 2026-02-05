@@ -13,6 +13,8 @@ import walletRoutes from './routes/walletRoutes';
 import accountRoutes from './routes/accountRoutes';
 import transferRoutes from './routes/transferRoutes';
 import fundingRoutes from './routes/fundingRoutes';
+import loanRoutes from './routes/loanRoutes';
+import { startInterestAccrualJob } from './jobs/interestAccrualJob';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +30,7 @@ app.use('/api/wallets', walletRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transfers', transferRoutes);
 app.use('/api/funding', fundingRoutes);
+app.use('/api/loans', loanRoutes);
 
 app.use(errorHandler);
 
@@ -36,5 +39,9 @@ sequelize.authenticate().then(() => {
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
     logger.info(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+
+    // Start background jobs
+    startInterestAccrualJob();
+    logger.info('Background jobs started');
   });
 });

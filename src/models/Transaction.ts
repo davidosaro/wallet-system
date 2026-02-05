@@ -37,6 +37,40 @@ export const Transaction = sequelize.define<
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    debitAccountNo: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+      field: 'debit_account_no',
+    },
+    creditAccountNo: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+      field: 'credit_account_no',
+    },
+    amount: {
+      type: DataTypes.DECIMAL(18, 4),
+      allowNull: true,
+    },
+    debitBalanceBefore: {
+      type: DataTypes.DECIMAL(18, 4),
+      allowNull: true,
+      field: 'debit_balance_before',
+    },
+    debitBalanceAfter: {
+      type: DataTypes.DECIMAL(18, 4),
+      allowNull: true,
+      field: 'debit_balance_after',
+    },
+    creditBalanceBefore: {
+      type: DataTypes.DECIMAL(18, 4),
+      allowNull: true,
+      field: 'credit_balance_before',
+    },
+    creditBalanceAfter: {
+      type: DataTypes.DECIMAL(18, 4),
+      allowNull: true,
+      field: 'credit_balance_after',
+    },
     metadata: {
       type: DataTypes.JSONB,
       allowNull: true,

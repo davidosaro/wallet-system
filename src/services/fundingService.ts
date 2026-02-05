@@ -95,23 +95,30 @@ export const fundingService = {
       // For other cases, check sufficient balance
       const sourceBalance = parseFloat(sourceAccount.get('clearedBalance') as string);
 
-      // Create the transaction record
+      // Calculate new balances
+      const destBalance = parseFloat(destAccount.get('clearedBalance') as string);
+      const sourceBalanceAfter = sourceBalance - amount;
+      const destBalanceAfter = destBalance + amount;
+
+      // Create the transaction record with all details
       const txReference = reference || generateReference();
       const tx = await transactionRepository.create(
         {
           idempotencyKey: idempotencyKey || null,
           transactionType: TransactionType.FUNDING,
           reference: txReference,
+          debitAccountNo: sourceAccountNo,
+          creditAccountNo: accountNo,
+          amount,
+          debitBalanceBefore: sourceBalance,
+          debitBalanceAfter: sourceBalanceAfter,
+          creditBalanceBefore: destBalance,
+          creditBalanceAfter: destBalanceAfter,
           metadata: metadata || null,
         },
         t
       );
       const transactionId = tx.get('id') as string;
-
-      // Calculate new balances
-      const destBalance = parseFloat(destAccount.get('clearedBalance') as string);
-      const sourceBalanceAfter = sourceBalance - amount;
-      const destBalanceAfter = destBalance + amount;
 
       // Create ledger entries (double-entry bookkeeping)
       await ledgerEntryRepository.createBulk(
@@ -224,6 +231,32 @@ export const fundingService = {
       throw new FundingError('Transaction not found', 'TRANSACTION_NOT_FOUND');
     }
 
+    // Try to get details from transaction record first
+    const debitAccountNo = tx.get('debitAccountNo') as string | null;
+    const creditAccountNo = tx.get('creditAccountNo') as string | null;
+    const txAmount = tx.get('amount') as string | null;
+
+    if (debitAccountNo && creditAccountNo && txAmount) {
+      return {
+        transactionId,
+        reference: tx.get('reference') as string,
+        status: tx.get('status') as string,
+        sourceAccount: {
+          accountNo: debitAccountNo,
+          balanceBefore: parseFloat(tx.get('debitBalanceBefore') as string),
+          balanceAfter: parseFloat(tx.get('debitBalanceAfter') as string),
+        },
+        destinationAccount: {
+          accountNo: creditAccountNo,
+          balanceBefore: parseFloat(tx.get('creditBalanceBefore') as string),
+          balanceAfter: parseFloat(tx.get('creditBalanceAfter') as string),
+        },
+        amount: parseFloat(txAmount),
+        createdAt: tx.get('createdAt') as Date,
+      };
+    }
+
+    // Fallback to ledger entries for older transactions
     const entries = await ledgerEntryRepository.findByTransactionId(transactionId);
     const debitEntry = entries.find((e) => e.get('entryType') === EntryType.DEBIT);
     const creditEntry = entries.find((e) => e.get('entryType') === EntryType.CREDIT);

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { walletService } from '../services/walletService';
+import { walletService, WalletError } from '../services/walletService';
 import { sendResponse } from '../utils/response';
 
 export const walletController = {
@@ -14,7 +14,8 @@ export const walletController = {
 
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const wallet = await walletService.getById(req.params.id);
+      // Use account balance as source of truth
+      const wallet = await walletService.getByIdWithAccountBalance(req.params.id);
       if (!wallet) {
         return sendResponse(res, 404, 'Wallet not found');
       }
@@ -29,42 +30,13 @@ export const walletController = {
       const wallet = await walletService.create(req.body);
       sendResponse(res, 201, 'Wallet created successfully', wallet);
     } catch (err) {
-      next(err);
-    }
-  },
-
-  async deposit(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { amount } = req.body;
-      const wallet = await walletService.deposit(req.params.id, amount);
-      if (!wallet) {
-        return sendResponse(res, 404, 'Wallet not found');
+      if (err instanceof WalletError) {
+        const statusCodes: Record<string, number> = {
+          WALLET_ALREADY_EXISTS: 409,
+        };
+        const statusCode = statusCodes[err.code] || 400;
+        return sendResponse(res, statusCode, err.message, { code: err.code });
       }
-      sendResponse(res, 200, 'Deposit successful', wallet);
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  async withdraw(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { amount } = req.body;
-      const wallet = await walletService.withdraw(req.params.id, amount);
-      if (!wallet) {
-        return sendResponse(res, 404, 'Wallet not found');
-      }
-      sendResponse(res, 200, 'Withdrawal successful', wallet);
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  async transfer(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { toWalletId, amount } = req.body;
-      const result = await walletService.transfer(req.params.id, toWalletId, amount);
-      sendResponse(res, 200, 'Transfer successful', result);
-    } catch (err) {
       next(err);
     }
   },

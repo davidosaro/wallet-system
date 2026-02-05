@@ -19,7 +19,8 @@ router.get('/', walletController.getAll);
  * @swagger
  * /api/wallets/{id}:
  *   get:
- *     summary: Get wallet by ID
+ *     summary: Get wallet by ID with account balance
+ *     description: Returns the wallet with balance from the associated account (source of truth)
  *     tags: [Wallets]
  *     parameters:
  *       - in: path
@@ -41,6 +42,7 @@ router.get('/:id', walletController.getById);
  * /api/wallets:
  *   post:
  *     summary: Create a new wallet
+ *     description: Creates a wallet and its associated account
  *     tags: [Wallets]
  *     requestBody:
  *       required: true
@@ -53,91 +55,6 @@ router.get('/:id', walletController.getById);
  *         description: Wallet created successfully
  */
 router.post('/', walletController.create);
-
-/**
- * @swagger
- * /api/wallets/{id}/deposit:
- *   post:
- *     summary: Deposit to wallet
- *     tags: [Wallets]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Amount'
- *     responses:
- *       200:
- *         description: Deposit successful
- *       404:
- *         description: Wallet not found
- */
-router.post('/:id/deposit', walletController.deposit);
-
-/**
- * @swagger
- * /api/wallets/{id}/withdraw:
- *   post:
- *     summary: Withdraw from wallet
- *     tags: [Wallets]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Amount'
- *     responses:
- *       200:
- *         description: Withdrawal successful
- *       400:
- *         description: Insufficient balance
- *       404:
- *         description: Wallet not found
- */
-router.post('/:id/withdraw', walletController.withdraw);
-
-/**
- * @swagger
- * /api/wallets/{id}/transfer:
- *   post:
- *     summary: Transfer between wallets
- *     tags: [Wallets]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Transfer'
- *     responses:
- *       200:
- *         description: Transfer successful
- *       400:
- *         description: Insufficient balance
- *       404:
- *         description: Wallet not found
- */
-router.post('/:id/transfer', walletController.transfer);
 
 /**
  * @swagger

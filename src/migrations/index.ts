@@ -6,6 +6,9 @@ import * as createTransactionsTable from './004_create_transactions_table';
 import * as createLedgerEntriesTable from './005_create_ledger_entries_table';
 import * as addAccountNoToWallets from './006_add_account_no_to_wallets';
 import * as changeLedgerAccountIdToAccountNo from './007_change_ledger_account_id_to_account_no';
+import * as addTransactionDetails from './008_add_transaction_details';
+import * as createLoansTable from './009_create_loans_table';
+import * as createDailyInterestAccrualsTable from './010_create_daily_interest_accruals_table';
 
 const migrations = [
   createUsersTable,
@@ -15,6 +18,9 @@ const migrations = [
   createLedgerEntriesTable,
   addAccountNoToWallets,
   changeLedgerAccountIdToAccountNo,
+  addTransactionDetails,
+  createLoansTable,
+  createDailyInterestAccrualsTable,
 ];
 
 export async function runMigrations() {

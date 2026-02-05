@@ -2,6 +2,7 @@ export enum TransactionType {
   TRANSFER = 'TRANSFER',
   FUNDING = 'FUNDING',
   INTEREST = 'INTEREST',
+  DISBURSEMENT = 'DISBURSEMENT',
 }
 
 export enum TransactionStatus {
@@ -16,6 +17,13 @@ export interface TransactionAttributes {
   transactionType: TransactionType;
   status: TransactionStatus;
   reference: string;
+  debitAccountNo?: string | null;
+  creditAccountNo?: string | null;
+  amount?: number | null;
+  debitBalanceBefore?: number | null;
+  debitBalanceAfter?: number | null;
+  creditBalanceBefore?: number | null;
+  creditBalanceAfter?: number | null;
   metadata?: Record<string, unknown> | null;
   errorMessage?: string | null;
   createdAt?: Date;
@@ -27,5 +35,12 @@ export interface CreateTransactionDto {
   transactionType: TransactionType;
   status?: TransactionStatus;
   reference: string;
+  debitAccountNo?: string | null;
+  creditAccountNo?: string | null;
+  amount?: number | null;
+  debitBalanceBefore?: number | null;
+  debitBalanceAfter?: number | null;
+  creditBalanceBefore?: number | null;
+  creditBalanceAfter?: number | null;
   metadata?: Record<string, unknown> | null;
 }

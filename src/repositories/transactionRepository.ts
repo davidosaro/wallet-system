@@ -1,4 +1,4 @@
-import { Transaction as TransactionType } from 'sequelize';
+import { Transaction as TransactionType, Op } from 'sequelize';
 import { Transaction } from '../models/Transaction';
 import { TransactionStatus, TransactionType as TxType } from '../types/transaction';
 
@@ -6,6 +6,13 @@ interface CreateTransactionData {
   idempotencyKey?: string | null;
   transactionType: TxType;
   reference: string;
+  debitAccountNo?: string | null;
+  creditAccountNo?: string | null;
+  amount?: number | null;
+  debitBalanceBefore?: number | null;
+  debitBalanceAfter?: number | null;
+  creditBalanceBefore?: number | null;
+  creditBalanceAfter?: number | null;
   metadata?: Record<string, unknown> | null;
 }
 
@@ -32,6 +39,19 @@ export const transactionRepository = {
     return Transaction.findAll({
       where: { status },
       order: [['created_at', 'DESC']],
+    });
+  },
+
+  async findByAccountNo(accountNo: string, limit?: number) {
+    return Transaction.findAll({
+      where: {
+        [Op.or]: [
+          { debitAccountNo: accountNo },
+          { creditAccountNo: accountNo },
+        ],
+      },
+      order: [['created_at', 'DESC']],
+      ...(limit && { limit }),
     });
   },
 

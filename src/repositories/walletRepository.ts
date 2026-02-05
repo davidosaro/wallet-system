@@ -15,6 +15,10 @@ export const walletRepository = {
     return Wallet.findOne({ where: { userId } });
   },
 
+  async findByUserIdAndCurrency(userId: string, currency: string) {
+    return Wallet.findOne({ where: { userId, currency } });
+  },
+
   async create(data: CreateWalletDto) {
     return Wallet.create(data);
   },

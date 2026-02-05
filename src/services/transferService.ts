@@ -3,6 +3,7 @@ import { sequelize } from '../config/database';
 import { transactionRepository } from '../repositories/transactionRepository';
 import { ledgerEntryRepository } from '../repositories/ledgerEntryRepository';
 import { accountRepository } from '../repositories/accountRepository';
+import { walletRepository } from '../repositories/walletRepository';
 import { TransactionType, TransactionStatus } from '../types/transaction';
 import { EntryType } from '../types/ledgerEntry';
 import { TransferRequestDto, TransferResponse } from '../types/transfer';
@@ -83,29 +84,36 @@ export const transferService = {
         );
       }
 
-      // Check sufficient balance
-      const debitBalance = parseFloat(debitAccount.get('balance') as string);
+      // Check sufficient balance (use clearedBalance as source of truth)
+      const debitBalance = parseFloat(debitAccount.get('clearedBalance') as string);
       if (debitBalance < amount) {
         throw new TransferError('Insufficient balance', 'INSUFFICIENT_BALANCE');
       }
 
-      // Create the transaction record
+      // Calculate new balances
+      const creditBalance = parseFloat(creditAccount.get('clearedBalance') as string);
+      const debitBalanceAfter = debitBalance - amount;
+      const creditBalanceAfter = creditBalance + amount;
+
+      // Create the transaction record with all details
       const txReference = reference || generateReference();
       const tx = await transactionRepository.create(
         {
           idempotencyKey: idempotencyKey || null,
           transactionType: TransactionType.TRANSFER,
           reference: txReference,
+          debitAccountNo,
+          creditAccountNo,
+          amount,
+          debitBalanceBefore: debitBalance,
+          debitBalanceAfter,
+          creditBalanceBefore: creditBalance,
+          creditBalanceAfter,
           metadata: metadata || null,
         },
         t
       );
       const transactionId = tx.get('id') as string;
-
-      // Calculate new balances
-      const creditBalance = parseFloat(creditAccount.get('balance') as string);
-      const debitBalanceAfter = debitBalance - amount;
-      const creditBalanceAfter = creditBalance + amount;
 
       // Create ledger entries (double-entry bookkeeping)
       await ledgerEntryRepository.createBulk(
@@ -143,6 +151,17 @@ export const transferService = {
         creditBalanceAfter,
         t
       );
+
+      // Sync wallet balances if accounts are linked to wallets
+      const debitWalletId = debitAccount.get('walletId') as string | null;
+      const creditWalletId = creditAccount.get('walletId') as string | null;
+
+      if (debitWalletId) {
+        await walletRepository.updateBalance(debitWalletId, debitBalanceAfter, t);
+      }
+      if (creditWalletId) {
+        await walletRepository.updateBalance(creditWalletId, creditBalanceAfter, t);
+      }
 
       // Mark transaction as completed
       await transactionRepository.markCompleted(transactionId, t);
@@ -186,6 +205,32 @@ export const transferService = {
       throw new TransferError('Transaction not found', 'TRANSACTION_NOT_FOUND');
     }
 
+    // Try to get details from transaction record first
+    const debitAccountNo = tx.get('debitAccountNo') as string | null;
+    const creditAccountNo = tx.get('creditAccountNo') as string | null;
+    const txAmount = tx.get('amount') as string | null;
+
+    if (debitAccountNo && creditAccountNo && txAmount) {
+      return {
+        transactionId,
+        reference: tx.get('reference') as string,
+        status: tx.get('status') as string,
+        debitAccount: {
+          accountNo: debitAccountNo,
+          balanceBefore: parseFloat(tx.get('debitBalanceBefore') as string),
+          balanceAfter: parseFloat(tx.get('debitBalanceAfter') as string),
+        },
+        creditAccount: {
+          accountNo: creditAccountNo,
+          balanceBefore: parseFloat(tx.get('creditBalanceBefore') as string),
+          balanceAfter: parseFloat(tx.get('creditBalanceAfter') as string),
+        },
+        amount: parseFloat(txAmount),
+        createdAt: tx.get('createdAt') as Date,
+      };
+    }
+
+    // Fallback to ledger entries for older transactions
     const entries = await ledgerEntryRepository.findByTransactionId(transactionId);
     const debitEntry = entries.find(
       (e) => e.get('entryType') === EntryType.DEBIT
@@ -198,20 +243,17 @@ export const transferService = {
       throw new TransferError('Invalid transaction state', 'INVALID_TRANSACTION');
     }
 
-    const debitAccountNo = debitEntry.get('accountNo') as string;
-    const creditAccountNo = creditEntry.get('accountNo') as string;
-
     return {
       transactionId,
       reference: tx.get('reference') as string,
       status: tx.get('status') as string,
       debitAccount: {
-        accountNo: debitAccountNo,
+        accountNo: debitEntry.get('accountNo') as string,
         balanceBefore: parseFloat(debitEntry.get('balanceBefore') as string),
         balanceAfter: parseFloat(debitEntry.get('balanceAfter') as string),
       },
       creditAccount: {
-        accountNo: creditAccountNo,
+        accountNo: creditEntry.get('accountNo') as string,
         balanceBefore: parseFloat(creditEntry.get('balanceBefore') as string),
         balanceAfter: parseFloat(creditEntry.get('balanceAfter') as string),
       },
@@ -234,5 +276,9 @@ export const transferService = {
 
   async getAccountLedger(accountNo: string, limit?: number) {
     return ledgerEntryRepository.findByAccountNo(accountNo, limit);
+  },
+
+  async getAccountTransactions(accountNo: string, limit?: number) {
+    return transactionRepository.findByAccountNo(accountNo, limit);
   },
 };
