@@ -78,6 +78,45 @@ const options: swaggerJsdoc.Options = {
             data: { type: 'object' },
           },
         },
+        Account: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            accountType: {
+              type: 'string',
+              enum: ['USER_WALLET', 'POOL', 'INTEREST_EXPENSE'],
+            },
+            accountName: { type: 'string', example: 'Main Pool Account' },
+            accountNo: { type: 'string', example: 'WAL-NGN-001-0000001' },
+            balance: { type: 'number', example: 0 },
+            clearedBalance: { type: 'number', example: 0 },
+            currency: { type: 'string', example: 'NGN' },
+            walletId: { type: 'string', format: 'uuid', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        CreateAccount: {
+          type: 'object',
+          required: ['accountType', 'accountName'],
+          properties: {
+            accountType: {
+              type: 'string',
+              enum: ['USER_WALLET', 'POOL', 'INTEREST_EXPENSE'],
+              example: 'POOL',
+            },
+            accountName: { type: 'string', example: 'Main Pool Account' },
+            currency: { type: 'string', default: 'NGN' },
+          },
+        },
+        CreatePoolAccount: {
+          type: 'object',
+          required: ['accountName'],
+          properties: {
+            accountName: { type: 'string', example: 'Main Pool Account' },
+            currency: { type: 'string', default: 'NGN' },
+          },
+        },
       },
     },
   },

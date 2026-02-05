@@ -10,6 +10,7 @@ import { requestLogger } from './middleware/requestLogger';
 import { logger } from './utils/logger';
 import userRoutes from './routes/userRoutes';
 import walletRoutes from './routes/walletRoutes';
+import accountRoutes from './routes/accountRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +23,7 @@ app.use(requestLogger);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/users', userRoutes);
 app.use('/api/wallets', walletRoutes);
+app.use('/api/accounts', accountRoutes);
 
 app.use(errorHandler);
 

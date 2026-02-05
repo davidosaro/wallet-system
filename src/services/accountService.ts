@@ -1,13 +1,15 @@
 import { accountRepository } from '../repositories/accountRepository';
-import { AccountType, CreateAccountDto, CreatePoolAccountDto } from '../types/account';
+import {
+  AccountType,
+  CreateAccountDto,
+  CreatePoolAccountDto,
+} from '../types/account';
 
 const ACCOUNT_PREFIXES: Record<AccountType, string> = {
   [AccountType.USER_WALLET]: 'WAL',
   [AccountType.POOL]: 'POL',
   [AccountType.INTEREST_EXPENSE]: 'IEX',
 };
-
-const DEFAULT_BRANCH = '001';
 
 export const accountService = {
   getAll() {
@@ -30,16 +32,22 @@ export const accountService = {
     return accountRepository.findByType(accountType);
   },
 
-  async generateAccountNumber(accountType: AccountType, currency: string): Promise<string> {
+  async generateAccountNumber(
+    accountType: AccountType,
+    currency: string
+  ): Promise<string> {
     const prefix = ACCOUNT_PREFIXES[accountType];
     const count = await accountRepository.countByType(accountType);
     const sequence = (count + 1).toString().padStart(7, '0');
-    return `${prefix}-${currency}-${DEFAULT_BRANCH}-${sequence}`;
+    return `${prefix}${currency}${sequence}`;
   },
 
   async create(data: CreateAccountDto) {
     const currency = data.currency || 'NGN';
-    const accountNo = await this.generateAccountNumber(data.accountType, currency);
+    const accountNo = await this.generateAccountNumber(
+      data.accountType,
+      currency
+    );
 
     return accountRepository.create({
       accountType: data.accountType,
@@ -59,7 +67,11 @@ export const accountService = {
     });
   },
 
-  async createWalletAccount(walletId: string, currency: string, accountName: string) {
+  async createWalletAccount(
+    walletId: string,
+    currency: string,
+    accountName: string
+  ) {
     return this.create({
       accountType: AccountType.USER_WALLET,
       accountName,

@@ -1,4 +1,5 @@
 import { walletRepository } from '../repositories/walletRepository';
+import { accountService } from './accountService';
 import { CreateWalletDto } from '../types/wallet';
 
 export const walletService = {
@@ -14,8 +15,18 @@ export const walletService = {
     return walletRepository.findByUserId(userId);
   },
 
-  create(data: CreateWalletDto) {
-    return walletRepository.create(data);
+  async create(data: CreateWalletDto) {
+    const wallet = await walletRepository.create(data);
+    const walletId = wallet.get('id') as string;
+    const currency = wallet.get('currency') as string;
+
+    await accountService.createWalletAccount(
+      walletId,
+      currency,
+      `Wallet Account - ${walletId.slice(0, 8)}`
+    );
+
+    return wallet;
   },
 
   async deposit(id: string, amount: number) {
