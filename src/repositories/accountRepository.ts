@@ -1,3 +1,4 @@
+import { Transaction } from 'sequelize';
 import { Account } from '../models/Account';
 import { AccountType } from '../types/account';
 
@@ -14,12 +15,27 @@ export const accountRepository = {
     return Account.findAll({ order: [['created_at', 'DESC']] });
   },
 
-  async findById(id: string) {
-    return Account.findByPk(id);
+  async findById(id: string, transaction?: Transaction) {
+    return Account.findByPk(id, { transaction });
   },
 
-  async findByAccountNo(accountNo: string) {
-    return Account.findOne({ where: { accountNo } });
+  async findByIdWithLock(id: string, transaction: Transaction) {
+    return Account.findByPk(id, {
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
+  },
+
+  async findByAccountNo(accountNo: string, transaction?: Transaction) {
+    return Account.findOne({ where: { accountNo }, transaction });
+  },
+
+  async findByAccountNoWithLock(accountNo: string, transaction: Transaction) {
+    return Account.findOne({
+      where: { accountNo },
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
   },
 
   async findByWalletId(walletId: string) {
@@ -38,14 +54,34 @@ export const accountRepository = {
     return Account.create(data);
   },
 
-  async updateBalance(id: string, balance: number, clearedBalance?: number) {
-    const account = await Account.findByPk(id);
+  async updateBalance(
+    id: string,
+    balance: number,
+    clearedBalance?: number,
+    transaction?: Transaction
+  ) {
+    const account = await Account.findByPk(id, { transaction });
     if (!account) return null;
     const updateData: { balance: number; clearedBalance?: number } = { balance };
     if (clearedBalance !== undefined) {
       updateData.clearedBalance = clearedBalance;
     }
-    return account.update(updateData);
+    return account.update(updateData, { transaction });
+  },
+
+  async updateBalanceByAccountNo(
+    accountNo: string,
+    balance: number,
+    clearedBalance?: number,
+    transaction?: Transaction
+  ) {
+    const account = await Account.findOne({ where: { accountNo }, transaction });
+    if (!account) return null;
+    const updateData: { balance: number; clearedBalance?: number } = { balance };
+    if (clearedBalance !== undefined) {
+      updateData.clearedBalance = clearedBalance;
+    }
+    return account.update(updateData, { transaction });
   },
 
   async getLastAccountByType(accountType: AccountType) {

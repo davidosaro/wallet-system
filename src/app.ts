@@ -11,6 +11,8 @@ import { logger } from './utils/logger';
 import userRoutes from './routes/userRoutes';
 import walletRoutes from './routes/walletRoutes';
 import accountRoutes from './routes/accountRoutes';
+import transferRoutes from './routes/transferRoutes';
+import fundingRoutes from './routes/fundingRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +26,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/users', userRoutes);
 app.use('/api/wallets', walletRoutes);
 app.use('/api/accounts', accountRoutes);
+app.use('/api/transfers', transferRoutes);
+app.use('/api/funding', fundingRoutes);
 
 app.use(errorHandler);
 

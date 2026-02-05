@@ -1,6 +1,12 @@
 import { QueryInterface, DataTypes } from 'sequelize';
+import { tableExists, createIndexIfNotExists } from './helpers';
 
 export async function up(queryInterface: QueryInterface) {
+  if (await tableExists(queryInterface, 'accounts')) {
+    console.log('Table accounts already exists, skipping...');
+    return;
+  }
+
   await queryInterface.createTable('accounts', {
     id: {
       type: DataTypes.UUID,
@@ -56,9 +62,9 @@ export async function up(queryInterface: QueryInterface) {
     },
   });
 
-  await queryInterface.addIndex('accounts', ['account_type']);
-  await queryInterface.addIndex('accounts', ['wallet_id']);
-  await queryInterface.addIndex('accounts', ['currency']);
+  await createIndexIfNotExists(queryInterface, 'accounts', ['account_type']);
+  await createIndexIfNotExists(queryInterface, 'accounts', ['wallet_id']);
+  await createIndexIfNotExists(queryInterface, 'accounts', ['currency']);
 }
 
 export async function down(queryInterface: QueryInterface) {

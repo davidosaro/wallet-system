@@ -1,3 +1,4 @@
+import { Transaction } from 'sequelize';
 import { Wallet } from '../models/Wallet';
 import { CreateWalletDto } from '../types/wallet';
 
@@ -18,10 +19,16 @@ export const walletRepository = {
     return Wallet.create(data);
   },
 
-  async updateBalance(id: string, balance: number) {
+  async updateBalance(id: string, balance: number, transaction?: Transaction) {
+    const wallet = await Wallet.findByPk(id, { transaction });
+    if (!wallet) return null;
+    return wallet.update({ balance }, { transaction });
+  },
+
+  async updateAccountNo(id: string, accountNo: string) {
     const wallet = await Wallet.findByPk(id);
     if (!wallet) return null;
-    return wallet.update({ balance });
+    return wallet.update({ accountNo });
   },
 
   async delete(id: string) {

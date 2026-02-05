@@ -25,6 +25,11 @@ export const Wallet = sequelize.define<Model<WalletAttributes, CreateWalletDto>>
       allowNull: false,
       defaultValue: 'USD',
     },
+    accountNo: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+      field: 'account_no',
+    },
   },
   {
     tableName: 'wallets',

@@ -44,6 +44,7 @@ const options: swaggerJsdoc.Options = {
             userId: { type: 'string', format: 'uuid' },
             balance: { type: 'number', example: 100.0 },
             currency: { type: 'string', example: 'NGN' },
+            accountNo: { type: 'string', example: 'WALNGN0000001' },
             createdAt: { type: 'string', format: 'date-time' },
           },
         },
@@ -115,6 +116,135 @@ const options: swaggerJsdoc.Options = {
           properties: {
             accountName: { type: 'string', example: 'Main Pool Account' },
             currency: { type: 'string', default: 'NGN' },
+          },
+        },
+        Transaction: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            idempotencyKey: { type: 'string', nullable: true },
+            transactionType: {
+              type: 'string',
+              enum: ['TRANSFER', 'FUNDING', 'INTEREST'],
+            },
+            status: {
+              type: 'string',
+              enum: ['PENDING', 'COMPLETED', 'FAILED'],
+            },
+            reference: { type: 'string', example: 'TRF-ABC123-XYZ789' },
+            metadata: { type: 'object', nullable: true },
+            errorMessage: { type: 'string', nullable: true },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        LedgerEntry: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid' },
+            transactionId: { type: 'string', format: 'uuid' },
+            accountNo: { type: 'string', example: 'WALNGN0000001' },
+            entryType: { type: 'string', enum: ['DEBIT', 'CREDIT'] },
+            amount: { type: 'number', example: 100.0 },
+            balanceBefore: { type: 'number', example: 500.0 },
+            balanceAfter: { type: 'number', example: 400.0 },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        TransferRequest: {
+          type: 'object',
+          required: ['debitAccountNo', 'creditAccountNo', 'amount'],
+          properties: {
+            debitAccountNo: { type: 'string', example: 'WALNGN0000001' },
+            creditAccountNo: { type: 'string', example: 'POLNGN0000001' },
+            amount: { type: 'number', example: 100.0 },
+            reference: { type: 'string', example: 'Payment for services' },
+            metadata: { type: 'object', example: { orderId: '12345' } },
+          },
+        },
+        TransferResponse: {
+          type: 'object',
+          properties: {
+            transactionId: { type: 'string', format: 'uuid' },
+            reference: { type: 'string' },
+            status: { type: 'string', enum: ['COMPLETED', 'FAILED'] },
+            debitAccount: {
+              type: 'object',
+              properties: {
+                accountNo: { type: 'string' },
+                balanceBefore: { type: 'number' },
+                balanceAfter: { type: 'number' },
+              },
+            },
+            creditAccount: {
+              type: 'object',
+              properties: {
+                accountNo: { type: 'string' },
+                balanceBefore: { type: 'number' },
+                balanceAfter: { type: 'number' },
+              },
+            },
+            amount: { type: 'number' },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        FundAccountRequest: {
+          type: 'object',
+          required: ['accountNo', 'sourceAccountNo', 'amount'],
+          properties: {
+            accountNo: {
+              type: 'string',
+              example: 'WALNGN0000001',
+              description: 'Destination account number to fund',
+            },
+            sourceAccountNo: {
+              type: 'string',
+              example: 'POLNGN0000001',
+              description: 'Source account (typically a pool account)',
+            },
+            amount: { type: 'number', example: 100.0 },
+            reference: { type: 'string', example: 'Deposit from bank transfer' },
+            metadata: { type: 'object', example: { bankRef: 'BNK123' } },
+          },
+        },
+        FundWalletRequest: {
+          type: 'object',
+          required: ['sourceAccountNo', 'amount'],
+          properties: {
+            sourceAccountNo: {
+              type: 'string',
+              example: 'POLNGN0000001',
+              description: 'Source account (typically a pool account)',
+            },
+            amount: { type: 'number', example: 100.0 },
+            reference: { type: 'string', example: 'Deposit from bank transfer' },
+            metadata: { type: 'object', example: { bankRef: 'BNK123' } },
+          },
+        },
+        FundingResponse: {
+          type: 'object',
+          properties: {
+            transactionId: { type: 'string', format: 'uuid' },
+            reference: { type: 'string' },
+            status: { type: 'string', enum: ['COMPLETED', 'FAILED'] },
+            sourceAccount: {
+              type: 'object',
+              properties: {
+                accountNo: { type: 'string' },
+                balanceBefore: { type: 'number' },
+                balanceAfter: { type: 'number' },
+              },
+            },
+            destinationAccount: {
+              type: 'object',
+              properties: {
+                accountNo: { type: 'string' },
+                balanceBefore: { type: 'number' },
+                balanceAfter: { type: 'number' },
+              },
+            },
+            amount: { type: 'number' },
+            createdAt: { type: 'string', format: 'date-time' },
           },
         },
       },

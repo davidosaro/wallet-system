@@ -3,6 +3,7 @@ export interface WalletAttributes {
   userId: string;
   balance: number;
   currency: string;
+  accountNo?: string | null;
   createdAt?: Date;
 }
 

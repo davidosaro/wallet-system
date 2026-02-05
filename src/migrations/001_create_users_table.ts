@@ -1,6 +1,12 @@
 import { QueryInterface, DataTypes } from 'sequelize';
+import { tableExists } from './helpers';
 
 export async function up(queryInterface: QueryInterface) {
+  if (await tableExists(queryInterface, 'users')) {
+    console.log('Table users already exists, skipping...');
+    return;
+  }
+
   await queryInterface.createTable('users', {
     id: {
       type: DataTypes.UUID,
