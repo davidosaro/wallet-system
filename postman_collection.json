@@ -1,12 +1,59 @@
 {
   "info": {
-    "name": "Wallet System API",
+    "name": "Loan Disbursement System API",
+    "description": "Complete API collection for the Loan Disbursement System with wallets, transfers, funding, and loans",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000"
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "user1_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user2_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alice_wallet_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bob_wallet_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alice_account_no",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "bob_account_no",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pool_account_no",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "loan_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "transaction_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -14,9 +61,70 @@
       "name": "Users",
       "item": [
         {
+          "name": "Create User - Alice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user1_id', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Johnson\",\n  \"email\": \"alice@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create User - Bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user2_id', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bob Smith\",\n  \"email\": \"bob@example.com\"\n}"
+            }
+          }
+        },
+        {
           "name": "Get All Users",
           "request": {
             "method": "GET",
+            "header": [],
             "url": "{{baseUrl}}/api/users"
           }
         },
@@ -24,40 +132,24 @@
           "name": "Get User by ID",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/users/1"
-          }
-        },
-        {
-          "name": "Create User",
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/api/users",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\"\n}"
-            }
+            "header": [],
+            "url": "{{baseUrl}}/api/users/{{user1_id}}"
           }
         },
         {
           "name": "Update User",
           "request": {
             "method": "PUT",
-            "url": "{{baseUrl}}/api/users/1",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
               }
             ],
+            "url": "{{baseUrl}}/api/users/{{user1_id}}",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\"\n}"
+              "raw": "{\n  \"name\": \"Alice Johnson Updated\",\n  \"email\": \"alice.updated@example.com\"\n}"
             }
           }
         },
@@ -65,7 +157,8 @@
           "name": "Delete User",
           "request": {
             "method": "DELETE",
-            "url": "{{baseUrl}}/api/users/1"
+            "header": [],
+            "url": "{{baseUrl}}/api/users/{{user1_id}}"
           }
         }
       ]
@@ -74,9 +167,72 @@
       "name": "Wallets",
       "item": [
         {
+          "name": "Create Wallet - Alice (NGN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('alice_wallet_id', response.data.id);",
+                  "    pm.collectionVariables.set('alice_account_no', response.data.accountNo);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/wallets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user1_id}}\",\n  \"currency\": \"NGN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Wallet - Bob (NGN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('bob_wallet_id', response.data.id);",
+                  "    pm.collectionVariables.set('bob_account_no', response.data.accountNo);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/wallets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user2_id}}\",\n  \"currency\": \"NGN\"\n}"
+            }
+          }
+        },
+        {
           "name": "Get All Wallets",
           "request": {
             "method": "GET",
+            "header": [],
             "url": "{{baseUrl}}/api/wallets"
           }
         },
@@ -84,82 +240,672 @@
           "name": "Get Wallet by ID",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/wallets/1"
-          }
-        },
-        {
-          "name": "Create Wallet",
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/api/wallets",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": 1,\n  \"currency\": \"USD\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Deposit",
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/api/wallets/1/deposit",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 100.00\n}"
-            }
-          }
-        },
-        {
-          "name": "Withdraw",
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/api/wallets/1/withdraw",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 50.00\n}"
-            }
-          }
-        },
-        {
-          "name": "Transfer",
-          "request": {
-            "method": "POST",
-            "url": "{{baseUrl}}/api/wallets/1/transfer",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"toWalletId\": 2,\n  \"amount\": 25.00\n}"
-            }
+            "header": [],
+            "url": "{{baseUrl}}/api/wallets/{{alice_wallet_id}}"
           }
         },
         {
           "name": "Delete Wallet",
           "request": {
             "method": "DELETE",
-            "url": "{{baseUrl}}/api/wallets/1"
+            "header": [],
+            "url": "{{baseUrl}}/api/wallets/{{alice_wallet_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/accounts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountType\": \"USER_WALLET\",\n  \"accountName\": \"Custom Account\",\n  \"currency\": \"NGN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Pool Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('pool_account_no', response.data.accountNo);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/accounts/pool",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountName\": \"Main Pool Account\",\n  \"currency\": \"NGN\",\n  \"initialBalance\": 10000000\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/accounts"
+          }
+        },
+        {
+          "name": "Get Account by Account Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/accounts/{{pool_account_no}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Funding",
+      "item": [
+        {
+          "name": "Fund Account from Pool",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('transaction_id', response.data.transactionId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "idempotency-key",
+                "value": "fund-alice-{{$timestamp}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/funding/accounts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNo\": \"{{alice_account_no}}\",\n  \"sourceAccountNo\": \"{{pool_account_no}}\",\n  \"amount\": 500000,\n  \"reference\": \"Initial funding for Alice\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Fund Wallet from Pool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "idempotency-key",
+                "value": "fund-wallet-{{$timestamp}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/funding/wallets/{{bob_wallet_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccountNo\": \"{{pool_account_no}}\",\n  \"amount\": 300000,\n  \"reference\": \"Funding Bob's wallet\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transfers",
+      "item": [
+        {
+          "name": "Transfer Between Accounts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('transaction_id', response.data.transactionId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "idempotency-key",
+                "value": "transfer-{{$timestamp}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transfers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"debitAccountNo\": \"{{alice_account_no}}\",\n  \"creditAccountNo\": \"{{bob_account_no}}\",\n  \"amount\": 100000,\n  \"metadata\": {\n    \"purpose\": \"Payment for services\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Transfers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/transfers"
+          }
+        },
+        {
+          "name": "Get Transfer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/transfers/{{transaction_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loans",
+      "item": [
+        {
+          "name": "Create Loan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('loan_id', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/loans",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNo\": \"{{bob_account_no}}\",\n  \"principalAmount\": 200000,\n  \"maturityDate\": \"2026-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Disburse Loan",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/loans/{{loan_id}}/disburse",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccountNo\": \"{{pool_account_no}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Loans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/loans"
+          }
+        },
+        {
+          "name": "Get Loan by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/loans/{{loan_id}}"
+          }
+        },
+        {
+          "name": "Get Loan Accruals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/loans/{{loan_id}}/accruals"
+          }
+        },
+        {
+          "name": "Manually Trigger Interest Accrual",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/loans/interest/accrue",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Testing Flow",
+      "description": "Complete end-to-end testing flow",
+      "item": [
+        {
+          "name": "1. Create User Alice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user1_id', response.data.id);",
+                  "    console.log('✅ Alice created with ID:', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Johnson\",\n  \"email\": \"alice@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2. Create User Bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user2_id', response.data.id);",
+                  "    console.log('✅ Bob created with ID:', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bob Smith\",\n  \"email\": \"bob@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3. Create Wallet - Alice (NGN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('alice_wallet_id', response.data.id);",
+                  "    pm.collectionVariables.set('alice_account_no', response.data.accountNo);",
+                  "    console.log('✅ Alice wallet created:', response.data.accountNo);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/wallets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user1_id}}\",\n  \"currency\": \"NGN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4. Create Wallet - Bob (NGN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('bob_wallet_id', response.data.id);",
+                  "    pm.collectionVariables.set('bob_account_no', response.data.accountNo);",
+                  "    console.log('✅ Bob wallet created:', response.data.accountNo);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/wallets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{user2_id}}\",\n  \"currency\": \"NGN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5. Create Pool Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('pool_account_no', response.data.accountNo);",
+                  "    console.log('✅ Pool account created:', response.data.accountNo);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/accounts/pool",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountName\": \"Main Pool Account\",\n  \"currency\": \"NGN\",\n  \"initialBalance\": 10000000\n}"
+            }
+          }
+        },
+        {
+          "name": "6. Fund Alice from Pool",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Alice funded with ₦500,000');",
+                  "    console.log('Balance:', response.data.destinationAccount.balanceAfter);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "idempotency-key",
+                "value": "fund-alice-test-flow"
+              }
+            ],
+            "url": "{{baseUrl}}/api/funding/accounts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNo\": \"{{alice_account_no}}\",\n  \"sourceAccountNo\": \"{{pool_account_no}}\",\n  \"amount\": 500000,\n  \"reference\": \"Initial funding for Alice\"\n}"
+            }
+          }
+        },
+        {
+          "name": "7. Transfer Alice to Bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Transfer completed: ₦100,000');",
+                  "    console.log('Alice balance:', response.data.debitAccount.balanceAfter);",
+                  "    console.log('Bob balance:', response.data.creditAccount.balanceAfter);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "idempotency-key",
+                "value": "transfer-test-flow"
+              }
+            ],
+            "url": "{{baseUrl}}/api/transfers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"debitAccountNo\": \"{{alice_account_no}}\",\n  \"creditAccountNo\": \"{{bob_account_no}}\",\n  \"amount\": 100000,\n  \"metadata\": {\n    \"purpose\": \"Payment for services\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "8. Create Loan for Bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('loan_id', response.data.id);",
+                  "    console.log('✅ Loan created:', response.data.loanNumber);",
+                  "    console.log('Principal: ₦200,000 at 27.5% APR');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/loans",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountNo\": \"{{bob_account_no}}\",\n  \"principalAmount\": 200000,\n  \"maturityDate\": \"2026-12-31\"\n}"
+            }
+          }
+        },
+        {
+          "name": "9. Disburse Loan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Loan disbursed');",
+                  "    console.log('Status:', response.data.status);",
+                  "    console.log('Bob total balance: ₦300,000 (₦100k transfer + ₦200k loan)');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/loans/{{loan_id}}/disburse",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceAccountNo\": \"{{pool_account_no}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "10. Trigger Interest Accrual",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Interest accrued');",
+                  "    console.log('Processed loans:', response.data.processed);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/loans/interest/accrue",
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            }
+          }
+        },
+        {
+          "name": "11. Get Loan Accruals",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data.length > 0) {",
+                  "        const accrual = response.data[0];",
+                  "        console.log('✅ Accrual details:');",
+                  "        console.log('Daily interest: ₦' + accrual.interestAmount);",
+                  "        console.log('Daily rate:', accrual.dailyRate);",
+                  "        console.log('Days in year:', accrual.daysInYear);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/loans/{{loan_id}}/accruals"
+          }
+        },
+        {
+          "name": "12. Check Final Loan Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    console.log('✅ Final loan status:');",
+                  "    console.log('Outstanding principal: ₦' + response.data.outstandingPrincipal);",
+                  "    console.log('Accrued interest: ₦' + response.data.accruedInterest);",
+                  "    console.log('Status:', response.data.status);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/loans/{{loan_id}}"
           }
         }
       ]

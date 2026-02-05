@@ -1,5 +1,5 @@
 import { walletService, WalletError } from '../../services/walletService';
-import { createTestUser, createTestWallet } from '../factories';
+import { createTestUser, createTestWallet } from '../factories.mock';
 
 describe('WalletService', () => {
   describe('create', () => {

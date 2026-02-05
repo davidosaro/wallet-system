@@ -3,7 +3,7 @@ import {
   createTestUser,
   createTestWallet,
   createTestPoolAccount,
-} from '../factories';
+} from '../factories.mock';
 
 describe('FundingService', () => {
   describe('fundAccount', () => {
@@ -23,8 +23,8 @@ describe('FundingService', () => {
 
       expect(result.status).toBe('COMPLETED');
       expect(result.amount).toBe(50000);
-      expect(result.creditBalanceAfter).toBe(50000);
-      expect(result.debitBalanceAfter).toBe(950000);
+      expect(result.destinationAccount.balanceAfter).toBe(50000);
+      expect(result.sourceAccount.balanceAfter).toBe(950000);
     });
 
     it('should throw error for invalid amount (zero)', async () => {
@@ -166,7 +166,7 @@ describe('FundingService', () => {
       );
 
       expect(result1.transactionId).toBe(result2.transactionId);
-      expect(result2.creditBalanceAfter).toBe(50000); // Only funded once
+      expect(result2.destinationAccount.balanceAfter).toBe(50000); // Only funded once
     });
 
     it('should sync wallet balance after funding', async () => {
@@ -205,7 +205,7 @@ describe('FundingService', () => {
 
       expect(result.status).toBe('COMPLETED');
       expect(result.amount).toBe(75000);
-      expect(result.creditBalanceAfter).toBe(75000);
+      expect(result.destinationAccount.balanceAfter).toBe(75000);
     });
 
     it('should throw error for non-existent wallet', async () => {

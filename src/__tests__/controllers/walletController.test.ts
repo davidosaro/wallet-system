@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { walletController } from '../../controllers/walletController';
 import { walletService, WalletError } from '../../services/walletService';
-import { createTestUser, createTestWallet } from '../factories';
+import { createTestUser, createTestWallet } from '../factories.mock';
 
 // Mock sendResponse utility
 jest.mock('../../utils/response', () => ({

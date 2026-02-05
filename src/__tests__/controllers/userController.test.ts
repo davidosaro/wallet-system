@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { userController } from '../../controllers/userController';
-import { createTestUser } from '../factories';
+import { createTestUser } from '../factories.mock';
 
 // Mock sendResponse utility
 jest.mock('../../utils/response', () => ({

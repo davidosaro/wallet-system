@@ -29,10 +29,10 @@ describe('ErrorHandler Middleware', () => {
 
   describe('ValidationError', () => {
     it('should handle Sequelize ValidationError with 400 status', () => {
-      const validationError = new ValidationError('Validation error', [
+      const validationError = new ValidationError('validation error', [
         new ValidationErrorItem(
           'Must be a valid email address',
-          'Validation error',
+          'validation error',
           'email',
           'invalid-email',
           null as any,
@@ -65,10 +65,10 @@ describe('ErrorHandler Middleware', () => {
     });
 
     it('should handle multiple validation errors', () => {
-      const validationError = new ValidationError('Validation error', [
+      const validationError = new ValidationError('validation error', [
         new ValidationErrorItem(
           'Email cannot be empty',
-          'Validation error',
+          'validation error',
           'email',
           '',
           null as any,
@@ -78,9 +78,9 @@ describe('ErrorHandler Middleware', () => {
         ),
         new ValidationErrorItem(
           'Name is required',
-          'Validation error',
+          'validation error',
           'name',
-          null,
+          '',
           null as any,
           'notNull',
           'notNull',
@@ -181,7 +181,9 @@ describe('ErrorHandler Middleware', () => {
 
   describe('DatabaseError', () => {
     it('should handle Sequelize DatabaseError with 500 status', () => {
-      const dbError = new DatabaseError(new Error('Database connection failed'));
+      const errorParent = new Error('Connection refused');
+      (errorParent as any).sql = 'SELECT * FROM users';
+      const dbError = new DatabaseError(errorParent as any);
 
       errorHandler(
         dbError,

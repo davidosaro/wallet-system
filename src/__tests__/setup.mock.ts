@@ -95,18 +95,18 @@ const createMockModel = (modelName: string) => {
 };
 
 // Create a model instance with get/update/reload methods
-const createModelInstance = (data: any) => {
-  const instance = {
+const createModelInstance = (data: any): any => {
+  const instance: any = {
     ...data,
     get: jest.fn((key?: string) => {
       if (key) return data[key];
       return data;
     }),
-    update: jest.fn(async (newData: any) => {
+    update: jest.fn(async (newData: any): Promise<any> => {
       Object.assign(data, newData);
       return instance;
     }),
-    reload: jest.fn(async () => {
+    reload: jest.fn(async (): Promise<any> => {
       return instance;
     }),
     toJSON: jest.fn(() => data),
@@ -128,7 +128,16 @@ jest.mock('../config/database', () => ({
     sync: jest.fn().mockResolvedValue(undefined),
     close: jest.fn().mockResolvedValue(undefined),
     transaction: jest.fn(async (callback) => {
-      const mockTransaction = { commit: jest.fn(), rollback: jest.fn() };
+      const mockTransaction = {
+        commit: jest.fn(),
+        rollback: jest.fn(),
+        LOCK: {
+          UPDATE: 'UPDATE',
+          SHARE: 'SHARE',
+          KEY_SHARE: 'KEY_SHARE',
+          NO_KEY_UPDATE: 'NO_KEY_UPDATE',
+        },
+      };
       const result = await callback(mockTransaction);
       return result;
     }),

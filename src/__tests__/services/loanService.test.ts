@@ -4,7 +4,7 @@ import {
   createTestUser,
   createTestWallet,
   createTestPoolAccount,
-} from '../factories';
+} from '../factories.mock';
 
 describe('LoanService', () => {
   describe('createLoan', () => {
