@@ -1,20 +1,30 @@
 import { QueryInterface, DataTypes } from 'sequelize';
 
 export async function up(queryInterface: QueryInterface) {
-  await queryInterface.createTable('users', {
+  await queryInterface.createTable('wallets', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    name: {
-      type: DataTypes.STRING(100),
+    user_id: {
+      type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
     },
-    email: {
-      type: DataTypes.STRING(100),
+    balance: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
-      unique: true,
+      defaultValue: 0,
+    },
+    currency: {
+      type: DataTypes.STRING(3),
+      allowNull: false,
+      defaultValue: 'USD',
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -24,5 +34,5 @@ export async function up(queryInterface: QueryInterface) {
 }
 
 export async function down(queryInterface: QueryInterface) {
-  await queryInterface.dropTable('users');
+  await queryInterface.dropTable('wallets');
 }

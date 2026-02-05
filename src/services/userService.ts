@@ -6,7 +6,7 @@ export const userService = {
     return userRepository.findAll();
   },
 
-  getById(id: number) {
+  getById(id: string) {
     return userRepository.findById(id);
   },
 
@@ -14,11 +14,11 @@ export const userService = {
     return userRepository.create(data);
   },
 
-  update(id: number, data: CreateUserDto) {
+  update(id: string, data: CreateUserDto) {
     return userRepository.update(id, data);
   },
 
-  delete(id: number) {
+  delete(id: string) {
     return userRepository.delete(id);
   },
 };

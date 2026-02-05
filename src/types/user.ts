@@ -1,5 +1,5 @@
 export interface UserAttributes {
-  id: number;
+  id: string;
   name: string;
   email: string;
   createdAt?: Date;

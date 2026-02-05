@@ -14,7 +14,7 @@ export const userController = {
 
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await userService.getById(parseInt(req.params.id));
+      const user = await userService.getById(req.params.id);
       if (!user) {
         return sendResponse(res, 404, 'User not found');
       }
@@ -35,7 +35,7 @@ export const userController = {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await userService.update(parseInt(req.params.id), req.body);
+      const user = await userService.update(req.params.id, req.body);
       if (!user) {
         return sendResponse(res, 404, 'User not found');
       }
@@ -47,7 +47,7 @@ export const userController = {
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const deleted = await userService.delete(parseInt(req.params.id));
+      const deleted = await userService.delete(req.params.id);
       if (!deleted) {
         return sendResponse(res, 404, 'User not found');
       }
